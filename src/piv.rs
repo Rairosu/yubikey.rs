@@ -879,10 +879,11 @@ pub fn attest(yubikey: &mut YubiKey, key: SlotId) -> Result<Buffer> {
     let txn = yubikey.begin_transaction()?;
     let response = txn.transfer_data(&templ, &[], CB_OBJ_MAX)?;
 
-    if !response.is_success() {
-        if response.status_words() == StatusWords::NotSupportedError {
-            return Err(Error::NotSupported);
-        } else {
+    match response.status_words() {
+        StatusWords::Success => (),
+        StatusWords::NotSupportedError => return Err(Error::NotSupported),
+        st => {
+            debug!("attestation failed with statusWords: {:?}", st);
             return Err(Error::GenericError);
         }
     }
