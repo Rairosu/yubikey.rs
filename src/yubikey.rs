@@ -33,6 +33,7 @@
 use crate::{
     apdu::{Apdu, Ins},
     cccid::CccId,
+    certificate,
     chuid::ChuId,
     config::Config,
     error::{Error, Result},
@@ -409,6 +410,18 @@ impl YubiKey {
     /// Get the PIV keys contained in this YubiKey.
     pub fn piv_keys(&mut self) -> Result<Vec<piv::Key>> {
         piv::Key::list(self)
+    }
+
+    /// Get the PIV certificate contained in the specified slot.
+    #[cfg(feature = "untested")]
+    pub fn certificate(&mut self, slot: piv::SlotId) -> Result<certificate::Certificate> {
+        certificate::Certificate::read(self, slot)
+    }
+
+    /// Get the attestation certificate for the specified slot.
+    #[cfg(feature = "untested")]
+    pub fn attest(&mut self, slot: piv::SlotId) -> Result<Buffer> {
+        piv::attest(self, slot)
     }
 
     /// Deauthenticate.
